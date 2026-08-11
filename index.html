@@ -1,0 +1,2558 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="Sunday Miles — A community 5K run every Sunday at 6:30 AM from BM Habitat Mall."
+    >
+
+    <title>Sunday Miles — Run Together</title>
+
+    <!-- GOOGLE FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- LEAFLET MAP -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <style>
+
+        /* =====================================================
+           ROOT
+        ===================================================== */
+
+        :root {
+            --bg: #080909;
+            --panel: #101313;
+            --panel-light: #161a19;
+            --border: rgba(255,255,255,.09);
+            --text: #f5f6f2;
+            --muted: #8d9490;
+            --green: #d8ff3e;
+            --green-dark: #b7dd22;
+            --red: #ff5b61;
+            --max-width: 1200px;
+        }
+
+
+        /* =====================================================
+           RESET
+        ===================================================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Inter", sans-serif;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 74px;
+            z-index: 1000;
+            border-bottom: 1px solid transparent;
+            transition: .3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(8,9,9,.85);
+            backdrop-filter: blur(18px);
+            border-color: var(--border);
+        }
+
+        .nav-inner {
+            max-width: var(--max-width);
+            height: 100%;
+            margin: auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-family: "Space Grotesk";
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: var(--green);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+            color: #aab0ac;
+            font-size: 13px;
+        }
+
+        .nav-links a {
+            transition: .2s;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+        .nav-join {
+            padding: 11px 18px;
+            border-radius: 100px;
+            background: var(--green);
+            color: #080909;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .mobile-menu {
+            display: none;
+            border: none;
+            background: none;
+            color: white;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+
+        /* =====================================================
+           HERO
+        ===================================================== */
+
+        .hero {
+            min-height: 100vh;
+            padding: 140px 24px 70px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+
+            background-image:
+                linear-gradient(
+                    rgba(255,255,255,.025) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255,255,255,.025) 1px,
+                    transparent 1px
+                );
+
+            background-size: 65px 65px;
+
+            mask-image:
+                linear-gradient(
+                    to bottom,
+                    black,
+                    transparent
+                );
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 700px;
+            height: 700px;
+            right: -250px;
+            top: 80px;
+            border-radius: 50%;
+            background: var(--green);
+            opacity: .075;
+            filter: blur(180px);
+        }
+
+        .hero-inner {
+            max-width: var(--max-width);
+            width: 100%;
+            margin: auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 13px;
+            border-radius: 100px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.035);
+            color: #c6cbc8;
+            font-size: 11px;
+            letter-spacing: .5px;
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 14px var(--green);
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(216,255,62,.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(216,255,62,0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(216,255,62,0);
+            }
+        }
+
+        .hero h1 {
+            margin-top: 25px;
+            font-family: "Space Grotesk";
+            font-size: clamp(65px,10vw,140px);
+            line-height: .84;
+            letter-spacing: -8px;
+        }
+
+        .green {
+            color: var(--green);
+        }
+
+        .hero-description {
+            max-width: 580px;
+            margin-top: 30px;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 32px;
+        }
+
+        .primary-button,
+        .secondary-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 22px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 800;
+            transition: .25s;
+        }
+
+        .primary-button {
+            background: var(--green);
+            color: #080909;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                0 15px 40px rgba(216,255,62,.15);
+        }
+
+        .secondary-button {
+            background: rgba(255,255,255,.035);
+            border: 1px solid var(--border);
+        }
+
+        .secondary-button:hover {
+            background: rgba(255,255,255,.08);
+        }
+
+
+        /* =====================================================
+           COUNTDOWN
+        ===================================================== */
+
+        .countdown-card {
+            max-width: 740px;
+            margin-top: 55px;
+            padding: 20px;
+            border-radius: 23px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.035);
+            backdrop-filter: blur(16px);
+        }
+
+        .countdown-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .small-label {
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .location {
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .countdown {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 10px;
+        }
+
+        .time-box {
+            padding: 15px;
+            text-align: center;
+            background: #0b0d0d;
+            border-radius: 14px;
+        }
+
+        .time-box strong {
+            display: block;
+            font-family: "Space Grotesk";
+            font-size: 29px;
+        }
+
+        .time-box span {
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+
+        /* =====================================================
+           STATS
+        ===================================================== */
+
+        .stats {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stats-inner {
+            max-width: var(--max-width);
+            margin: auto;
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+        }
+
+        .stat {
+            padding: 28px 20px;
+            text-align: center;
+            border-right: 1px solid var(--border);
+        }
+
+        .stat:last-child {
+            border-right: none;
+        }
+
+        .stat strong {
+            display: block;
+            font-family: "Space Grotesk";
+            font-size: 35px;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+
+        /* =====================================================
+           GENERAL
+        ===================================================== */
+
+        section {
+            padding: 120px 24px;
+        }
+
+        .container {
+            max-width: var(--max-width);
+            margin: auto;
+        }
+
+        .kicker {
+            margin-bottom: 12px;
+            color: var(--green);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            font-family: "Space Grotesk";
+            font-size: clamp(42px,5vw,67px);
+            line-height: .94;
+            letter-spacing: -3px;
+        }
+
+        .section-description {
+            max-width: 500px;
+            margin-top: 20px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+
+        /* =====================================================
+           RUN DASHBOARD
+        ===================================================== */
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1.2fr .8fr;
+            gap: 18px;
+            margin-top: 55px;
+        }
+
+        .card {
+            padding: 32px;
+            border-radius: 25px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            transition: .3s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            background: var(--panel-light);
+        }
+
+        .distance {
+            font-family: "Space Grotesk";
+            font-size: 115px;
+            line-height: .8;
+            letter-spacing: -8px;
+            color: var(--green);
+        }
+
+        .card h3 {
+            margin-top: 25px;
+            font-family: "Space Grotesk";
+            font-size: 27px;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .run-details {
+            display: grid;
+            gap: 13px;
+            margin-top: 30px;
+        }
+
+        .detail {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 13px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .detail span {
+            color: var(--muted);
+        }
+
+        .welcome-box {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(216,255,62,.14);
+            background: rgba(216,255,62,.045);
+        }
+
+        .welcome-box strong {
+            color: var(--green);
+            font-size: 12px;
+        }
+
+        .welcome-box p {
+            margin-top: 7px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+
+        /* =====================================================
+           MAP
+        ===================================================== */
+
+        .route-section {
+            background: #0c0f0f;
+        }
+
+        .map-wrapper {
+            position: relative;
+            margin-top: 55px;
+            overflow: hidden;
+            border-radius: 28px;
+            border: 1px solid var(--border);
+            box-shadow:
+                0 25px 80px rgba(0,0,0,.35);
+        }
+
+        #runMap {
+            width: 100%;
+            height: 560px;
+        }
+
+        .map-overlay {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            z-index: 500;
+
+            display: flex;
+            gap: 8px;
+
+            padding: 10px;
+
+            border-radius: 15px;
+
+            background: rgba(8,9,9,.92);
+
+            backdrop-filter: blur(15px);
+
+            border: 1px solid rgba(255,255,255,.1);
+        }
+
+        .map-stat {
+            padding: 5px 12px;
+            border-right: 1px solid rgba(255,255,255,.1);
+        }
+
+        .map-stat:last-child {
+            border-right: none;
+        }
+
+        .map-stat span {
+            display: block;
+            color: var(--muted);
+            font-size: 8px;
+            letter-spacing: 1px;
+        }
+
+        .map-stat strong {
+            display: block;
+            margin-top: 4px;
+            font-size: 11px;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: #101313;
+            color: white;
+            border-radius: 12px;
+        }
+
+        .leaflet-popup-tip {
+            background: #101313;
+        }
+
+        .leaflet-popup-content {
+            font-family: Inter,sans-serif;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+
+        /* =====================================================
+           COMMUNITY
+        ===================================================== */
+
+        .community-grid {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 18px;
+            margin-top: 50px;
+        }
+
+        .community-card {
+            padding: 30px;
+            min-height: 260px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            transition: .3s;
+        }
+
+        .community-card:hover {
+            transform: translateY(-5px);
+            background: var(--panel-light);
+        }
+
+        .community-icon {
+            font-size: 30px;
+        }
+
+        .community-card h3 {
+            margin-top: 55px;
+            font-family: "Space Grotesk";
+            font-size: 24px;
+        }
+
+        .community-card p {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+
+        /* =====================================================
+           LEADERBOARD
+        ===================================================== */
+
+        .leaderboard {
+            margin-top: 50px;
+            overflow: hidden;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .runner {
+            display: grid;
+            grid-template-columns: 60px 1fr 100px 100px;
+            align-items: center;
+            padding: 18px 25px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .runner:last-child {
+            border-bottom: none;
+        }
+
+        .rank {
+            color: var(--muted);
+            font-family: "Space Grotesk";
+        }
+
+        .runner-name {
+            font-weight: 700;
+        }
+
+        .runner-type {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .runner-stat {
+            text-align: right;
+            font-family: "Space Grotesk";
+        }
+
+        .runner-stat small {
+            display: block;
+            color: var(--muted);
+            font-family: Inter;
+            font-size: 8px;
+        }
+
+
+        /* =====================================================
+           PACE CALCULATOR
+        ===================================================== */
+
+        .calculator {
+            max-width: 760px;
+            margin: 50px auto 0;
+            padding: 30px;
+            border-radius: 25px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+        }
+
+        .inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            outline: none;
+            background: #090b0b;
+            color: white;
+        }
+
+        .input-group input:focus {
+            border-color: var(--green);
+        }
+
+        .pace-result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(216,255,62,.14);
+            background: rgba(216,255,62,.05);
+        }
+
+        .pace-result span {
+            color: var(--muted);
+            font-size: 9px;
+            letter-spacing: 1px;
+        }
+
+        .pace-result strong {
+            display: block;
+            margin-top: 5px;
+            color: var(--green);
+            font-family: "Space Grotesk";
+            font-size: 30px;
+        }
+
+
+        /* =====================================================
+           FAQ
+        ===================================================== */
+
+        .faq {
+            max-width: 800px;
+            margin: 50px auto 0;
+        }
+
+        details {
+            padding: 22px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        summary {
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            list-style: none;
+            font-weight: 700;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::after {
+            content: "+";
+            color: var(--green);
+            font-size: 20px;
+        }
+
+        details[open] summary::after {
+            content: "−";
+        }
+
+        details p {
+            max-width: 650px;
+            padding-top: 15px;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 13px;
+        }
+
+
+        /* =====================================================
+           CTA
+        ===================================================== */
+
+        .cta {
+            padding-top: 30px;
+        }
+
+        .cta-box {
+            position: relative;
+            overflow: hidden;
+            padding: 75px 55px;
+            border-radius: 32px;
+            background: var(--green);
+            color: #080909;
+        }
+
+        .cta-box::after {
+            content: "5K";
+            position: absolute;
+            right: -20px;
+            bottom: -110px;
+            font-family: "Space Grotesk";
+            font-size: 320px;
+            font-weight: 800;
+            line-height: 1;
+            opacity: .08;
+        }
+
+        .cta-box h2 {
+            max-width: 700px;
+            font-family: "Space Grotesk";
+            font-size: clamp(50px,7vw,90px);
+            line-height: .9;
+            letter-spacing: -5px;
+        }
+
+        .cta-box p {
+            max-width: 500px;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .whatsapp-button {
+            display: inline-flex;
+            position: relative;
+            z-index: 10;
+            margin-top: 30px;
+            padding: 15px 22px;
+            border-radius: 100px;
+            background: #080909;
+            color: white;
+            font-weight: 800;
+            transition: .25s;
+        }
+
+        .whatsapp-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0,0,0,.2);
+        }
+
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        footer {
+            padding: 50px 24px 30px;
+        }
+
+        .footer {
+            max-width: var(--max-width);
+            margin: auto;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .footer-logo {
+            color: white;
+            font-family: "Space Grotesk";
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .footer-logo span {
+            color: var(--green);
+        }
+
+
+        /* =====================================================
+           SCROLL ANIMATION
+        ===================================================== */
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+
+            transition:
+                opacity .8s ease,
+                transform .8s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media(max-width:850px) {
+
+            .nav-links,
+            .nav-join {
+                display: none;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+
+            .nav-links.mobile-open {
+
+                position: absolute;
+                top: 74px;
+                left: 0;
+                width: 100%;
+
+                display: flex;
+                flex-direction: column;
+
+                padding: 25px;
+
+                background: rgba(8,9,9,.97);
+
+                border-bottom: 1px solid var(--border);
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .community-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-inner {
+                grid-template-columns: repeat(2,1fr);
+            }
+
+            .stat:nth-child(2) {
+                border-right: none;
+            }
+
+            .runner {
+                grid-template-columns: 40px 1fr 70px;
+            }
+
+            .runner-stat:last-child {
+                display: none;
+            }
+        }
+
+
+        @media(max-width:550px) {
+
+            section {
+                padding: 85px 18px;
+            }
+
+            .hero {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .hero h1 {
+                font-size: 65px;
+                letter-spacing: -5px;
+            }
+
+            .hero-description {
+                font-size: 15px;
+            }
+
+            .countdown {
+                grid-template-columns: repeat(2,1fr);
+            }
+
+            .distance {
+                font-size: 90px;
+            }
+
+            .inputs {
+                grid-template-columns: 1fr;
+            }
+
+            #runMap {
+                height: 440px;
+            }
+
+            .map-overlay {
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                overflow-x: auto;
+            }
+
+            .map-stat {
+                min-width: max-content;
+            }
+
+            .cta-box {
+                padding: 45px 28px;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<nav class="navbar" id="navbar">
+
+    <div class="nav-inner">
+
+        <a href="#" class="logo">
+            Sunday<span>Miles</span>
+        </a>
+
+
+        <ul class="nav-links" id="navLinks">
+
+            <li>
+                <a href="#run">The Run</a>
+            </li>
+
+            <li>
+                <a href="#route">Route</a>
+            </li>
+
+            <li>
+                <a href="#community">Community</a>
+            </li>
+
+            <li>
+                <a href="#faq">FAQ</a>
+            </li>
+
+        </ul>
+
+
+        <!-- WHATSAPP LINK ADDED -->
+
+        <a
+            href="https://wa.me/919731740540"
+            class="nav-join"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            Join the run →
+        </a>
+
+
+        <button
+            class="mobile-menu"
+            id="mobileMenu"
+        >
+            ☰
+        </button>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<header class="hero">
+
+    <div class="hero-grid"></div>
+
+    <div class="hero-glow"></div>
+
+
+    <div class="hero-inner">
+
+
+        <div class="badge">
+
+            <span class="live-dot"></span>
+
+            EVERY SUNDAY · 6:30 AM
+
+        </div>
+
+
+        <h1>
+
+            RUN<br>
+
+            <span class="green">
+                TOGETHER.
+            </span>
+
+        </h1>
+
+
+        <p class="hero-description">
+
+            Sunday Miles is a community 5K built around
+            consistency, good people and better Sunday mornings.
+
+        </p>
+
+
+        <div class="hero-buttons">
+
+            <!-- WHATSAPP LINK ADDED -->
+
+            <a
+                href="https://wa.me/919731740540"
+                class="primary-button"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Join Sunday Miles →
+            </a>
+
+
+            <a
+                href="#route"
+                class="secondary-button"
+            >
+                Explore the route
+            </a>
+
+        </div>
+
+
+        <!-- COUNTDOWN -->
+
+        <div class="countdown-card">
+
+            <div class="countdown-top">
+
+                <span class="small-label">
+                    NEXT SUNDAY RUN
+                </span>
+
+                <span class="location">
+                    📍 BM Habitat Mall
+                </span>
+
+            </div>
+
+
+            <div class="countdown">
+
+                <div class="time-box">
+                    <strong id="days">00</strong>
+                    <span>Days</span>
+                </div>
+
+                <div class="time-box">
+                    <strong id="hours">00</strong>
+                    <span>Hours</span>
+                </div>
+
+                <div class="time-box">
+                    <strong id="minutes">00</strong>
+                    <span>Minutes</span>
+                </div>
+
+                <div class="time-box">
+                    <strong id="seconds">00</strong>
+                    <span>Seconds</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+
+<!-- =====================================================
+     STATS
+===================================================== -->
+
+<div class="stats">
+
+    <div class="stats-inner">
+
+        <div class="stat">
+            <strong>5K</strong>
+            <span>Every Sunday</span>
+        </div>
+
+        <div class="stat">
+            <strong>6:30</strong>
+            <span>AM Start</span>
+        </div>
+
+        <div class="stat">
+            <strong>1</strong>
+            <span>Community</span>
+        </div>
+
+        <div class="stat">
+            <strong>∞</strong>
+            <span>Miles Ahead</span>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     THE RUN
+===================================================== -->
+
+<section id="run">
+
+    <div class="container">
+
+        <div class="reveal">
+
+            <div class="kicker">
+                THE SUNDAY RUN
+            </div>
+
+            <h2 class="section-title">
+                One run.<br>
+                Every week.
+            </h2>
+
+            <p class="section-description">
+
+                No complicated training plans.
+                No pressure to be the fastest.
+                Just a consistent 5K with a community.
+
+            </p>
+
+        </div>
+
+
+        <div class="dashboard">
+
+            <div class="card reveal">
+
+                <div class="distance">
+                    5K
+                </div>
+
+                <h3>
+                    Five kilometres.
+                    One good start.
+                </h3>
+
+
+                <div class="run-details">
+
+                    <div class="detail">
+                        <span>Day</span>
+                        <strong>Every Sunday</strong>
+                    </div>
+
+                    <div class="detail">
+                        <span>Meet</span>
+                        <strong>6:30 AM</strong>
+                    </div>
+
+                    <div class="detail">
+                        <span>Start</span>
+                        <strong>BM Habitat Mall</strong>
+                    </div>
+
+                    <div class="detail">
+                        <span>Route</span>
+                        <strong>5 KM Out & Back</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card reveal">
+
+                <div class="kicker">
+                    RUN CLUB RULE #01
+                </div>
+
+                <h3>
+                    Your pace.
+                    Your run.
+                </h3>
+
+                <p
+                    class="muted"
+                    style="margin-top:15px;line-height:1.7;"
+                >
+
+                    Whether you're chasing a PB,
+                    getting back into running,
+                    or just trying something new,
+                    you belong here.
+
+                </p>
+
+
+                <div class="welcome-box">
+
+                    <strong>
+                        BEGINNERS WELCOME
+                    </strong>
+
+                    <p>
+                        Run at a comfortable pace
+                        and build up gradually.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     ROUTE MAP
+===================================================== -->
+
+<section
+    class="route-section"
+    id="route"
+>
+
+    <div class="container">
+
+        <div class="reveal">
+
+            <div class="kicker">
+                THE ROUTE
+            </div>
+
+            <h2 class="section-title">
+                Out.<br>
+                Back.
+            </h2>
+
+            <p class="section-description">
+
+                Start at BM Habitat Mall,
+                run towards Chalwamba Park,
+                turn around and head back.
+
+            </p>
+
+        </div>
+
+
+        <div class="map-wrapper reveal">
+
+            <div id="runMap"></div>
+
+
+            <div class="map-overlay">
+
+                <div class="map-stat">
+
+                    <span>START</span>
+
+                    <strong>
+                        BM Habitat Mall
+                    </strong>
+
+                </div>
+
+
+                <div class="map-stat">
+
+                    <span>TURNAROUND</span>
+
+                    <strong>
+                        Chalwamba Park
+                    </strong>
+
+                </div>
+
+
+                <div class="map-stat">
+
+                    <span>DISTANCE</span>
+
+                    <strong>
+                        5 KM
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     COMMUNITY
+===================================================== -->
+
+<section id="community">
+
+    <div class="container">
+
+        <div class="reveal">
+
+            <div class="kicker">
+                THE COMMUNITY
+            </div>
+
+            <h2 class="section-title">
+                More than<br>
+                a 5K.
+            </h2>
+
+            <p class="section-description">
+
+                Sunday Miles is about making running
+                something you actually look forward to.
+
+            </p>
+
+        </div>
+
+
+        <div class="community-grid">
+
+            <div class="community-card reveal">
+
+                <div class="community-icon">
+                    🏃
+                </div>
+
+                <h3>
+                    Run together
+                </h3>
+
+                <p>
+                    Meet people who enjoy running
+                    and keep each other motivated.
+                </p>
+
+            </div>
+
+
+            <div class="community-card reveal">
+
+                <div class="community-icon">
+                    📈
+                </div>
+
+                <h3>
+                    Track progress
+                </h3>
+
+                <p>
+                    Keep showing up.
+                    Your pace and confidence
+                    will follow.
+                </p>
+
+            </div>
+
+
+            <div class="community-card reveal">
+
+                <div class="community-icon">
+                    ☀️
+                </div>
+
+                <h3>
+                    Own your Sunday
+                </h3>
+
+                <p>
+                    Start your morning with movement,
+                    fresh air and good people.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     LEADERBOARD
+===================================================== -->
+
+<section>
+
+    <div class="container">
+
+        <div class="reveal">
+
+            <div class="kicker">
+                THIS WEEK
+            </div>
+
+            <h2 class="section-title">
+                Run club<br>
+                board.
+            </h2>
+
+            <p class="section-description">
+
+                A sample leaderboard.
+                Replace these with your real Sunday Miles stats.
+
+            </p>
+
+        </div>
+
+
+        <div class="leaderboard reveal">
+
+
+            <div class="runner">
+
+                <div class="rank">01</div>
+
+                <div>
+
+                    <div class="runner-name">
+                        Arjun
+                    </div>
+
+                    <div class="runner-type">
+                        Sunday Miles
+                    </div>
+
+                </div>
+
+                <div class="runner-stat">
+
+                    22:41
+
+                    <small>5K TIME</small>
+
+                </div>
+
+                <div class="runner-stat">
+
+                    4:32
+
+                    <small>PACE</small>
+
+                </div>
+
+            </div>
+
+
+            <div class="runner">
+
+                <div class="rank">02</div>
+
+                <div>
+
+                    <div class="runner-name">
+                        Riya
+                    </div>
+
+                    <div class="runner-type">
+                        Sunday Miles
+                    </div>
+
+                </div>
+
+                <div class="runner-stat">
+
+                    24:18
+
+                    <small>5K TIME</small>
+
+                </div>
+
+                <div class="runner-stat">
+
+                    4:52
+
+                    <small>PACE</small>
+
+                </div>
+
+            </div>
+
+
+            <div class="runner">
+
+                <div class="rank">03</div>
+
+                <div>
+
+                    <div class="runner-name">
+                        Kabir
+                    </div>
+
+                    <div class="runner-type">
+                        Sunday Miles
+                    </div>
+
+                </div>
+
+                <div class="runner-stat">
+
+                    26:07
+
+                    <small>5K TIME</small>
+
+                </div>
+
+                <div class="runner-stat">
+
+                    5:13
+
+                    <small>PACE</small>
+
+                </div>
+
+            </div>
+
+
+            <div class="runner">
+
+                <div class="rank">04</div>
+
+                <div>
+
+                    <div class="runner-name">
+                        You?
+                    </div>
+
+                    <div class="runner-type">
+                        Next Sunday
+                    </div>
+
+                </div>
+
+                <div class="runner-stat">
+
+                    --:--
+
+                    <small>5K TIME</small>
+
+                </div>
+
+                <div class="runner-stat">
+
+                    --:--
+
+                    <small>PACE</small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     PACE CALCULATOR
+===================================================== -->
+
+<section>
+
+    <div class="container">
+
+        <div
+            style="text-align:center"
+            class="reveal"
+        >
+
+            <div class="kicker">
+                RUN DATA
+            </div>
+
+            <h2 class="section-title">
+                Know your pace.
+            </h2>
+
+            <p
+                class="section-description"
+                style="margin-left:auto;margin-right:auto"
+            >
+                Enter your 5K finish time
+                and calculate your average pace.
+            </p>
+
+        </div>
+
+
+        <div class="calculator reveal">
+
+            <div class="inputs">
+
+                <div class="input-group">
+
+                    <label>
+                        MINUTES
+                    </label>
+
+                    <input
+                        id="paceMinutes"
+                        type="number"
+                        min="0"
+                        placeholder="25"
+                    >
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label>
+                        SECONDS
+                    </label>
+
+                    <input
+                        id="paceSeconds"
+                        type="number"
+                        min="0"
+                        max="59"
+                        placeholder="00"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="pace-result">
+
+                <span>
+                    AVERAGE PACE
+                </span>
+
+                <strong id="paceResult">
+                    5:00 / KM
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FAQ
+===================================================== -->
+
+<section id="faq">
+
+    <div class="container">
+
+        <div class="reveal">
+
+            <div class="kicker">
+                FAQ
+            </div>
+
+            <h2 class="section-title">
+                Before you<br>
+                run.
+            </h2>
+
+        </div>
+
+
+        <div class="faq">
+
+            <details class="reveal">
+
+                <summary>
+                    When do we meet?
+                </summary>
+
+                <p>
+                    Every Sunday morning at 6:30 AM.
+                </p>
+
+            </details>
+
+
+            <details class="reveal">
+
+                <summary>
+                    Where do we meet?
+                </summary>
+
+                <p>
+                    We meet at BM Habitat Mall.
+                </p>
+
+            </details>
+
+
+            <details class="reveal">
+
+                <summary>
+                    What is the route?
+                </summary>
+
+                <p>
+                    We start at BM Habitat Mall,
+                    run towards Chalwamba Park,
+                    turn around and return.
+                    The target distance is 5K.
+                </p>
+
+            </details>
+
+
+            <details class="reveal">
+
+                <summary>
+                    Do I have to be fast?
+                </summary>
+
+                <p>
+                    Nope. Sunday Miles is about
+                    running together and enjoying
+                    the community.
+                </p>
+
+            </details>
+
+
+            <details class="reveal">
+
+                <summary>
+                    Can beginners join?
+                </summary>
+
+                <p>
+                    Absolutely. Run at a comfortable
+                    pace and build up gradually.
+                </p>
+
+            </details>
+
+
+            <details class="reveal">
+
+                <summary>
+                    What should I bring?
+                </summary>
+
+                <p>
+                    Comfortable running shoes,
+                    water and whatever you normally
+                    need for a morning run.
+                </p>
+
+            </details>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     JOIN
+===================================================== -->
+
+<section
+    class="cta"
+    id="join"
+>
+
+    <div class="container">
+
+        <div class="cta-box reveal">
+
+            <div
+                class="kicker"
+                style="color:#080909"
+            >
+                NEXT RUN · SUNDAY · 6:30 AM
+            </div>
+
+
+            <h2>
+                Don't just<br>
+                scroll.<br>
+                Run.
+            </h2>
+
+
+            <p>
+
+                Meet us at BM Habitat Mall
+                for the next Sunday Miles 5K.
+                Bring your shoes. We'll bring the miles.
+
+            </p>
+
+
+            <!-- YOUR WHATSAPP NUMBER -->
+
+            <a
+                href="https://wa.me/919731740540"
+                class="whatsapp-button"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                Join Sunday Miles on WhatsApp →
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+    <div class="footer">
+
+        <div>
+
+            <div class="footer-logo">
+                Sunday<span>Miles</span>
+            </div>
+
+            <div style="margin-top:7px">
+                5K · Every Sunday · 6:30 AM
+            </div>
+
+        </div>
+
+
+        <div>
+
+            © <span id="year"></span>
+            Sunday Miles
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+
+<!-- =====================================================
+     LEAFLET
+===================================================== -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+
+<script>
+
+/* =====================================================
+   NAVBAR
+===================================================== */
+
+const navbar =
+    document.getElementById("navbar");
+
+
+window.addEventListener("scroll", () => {
+
+    if (window.scrollY > 30) {
+
+        navbar.classList.add("scrolled");
+
+    } else {
+
+        navbar.classList.remove("scrolled");
+
+    }
+
+});
+
+
+
+/* =====================================================
+   MOBILE MENU
+===================================================== */
+
+const mobileMenu =
+    document.getElementById("mobileMenu");
+
+const navLinks =
+    document.getElementById("navLinks");
+
+
+mobileMenu.addEventListener("click", () => {
+
+    navLinks.classList.toggle("mobile-open");
+
+    mobileMenu.textContent =
+        navLinks.classList.contains("mobile-open")
+        ? "×"
+        : "☰";
+
+});
+
+
+document
+    .querySelectorAll(".nav-links a")
+    .forEach(link => {
+
+        link.addEventListener("click", () => {
+
+            navLinks.classList.remove(
+                "mobile-open"
+            );
+
+            mobileMenu.textContent = "☰";
+
+        });
+
+    });
+
+
+
+/* =====================================================
+   COUNTDOWN
+===================================================== */
+
+function getNextSunday() {
+
+    const now = new Date();
+
+    const next = new Date(now);
+
+    const currentDay =
+        now.getDay();
+
+    let daysUntil =
+        (7 - currentDay) % 7;
+
+
+    if (currentDay === 0) {
+
+        const currentMinutes =
+            now.getHours() * 60 +
+            now.getMinutes();
+
+
+        if (currentMinutes >= 390) {
+
+            daysUntil = 7;
+
+        }
+
+    }
+
+
+    next.setDate(
+        now.getDate() + daysUntil
+    );
+
+    next.setHours(
+        6,
+        30,
+        0,
+        0
+    );
+
+
+    return next;
+
+}
+
+
+function updateCountdown() {
+
+    const target =
+        getNextSunday();
+
+    const now =
+        new Date();
+
+
+    let difference =
+        target - now;
+
+
+    if (difference < 0) {
+        difference = 0;
+    }
+
+
+    const days =
+        Math.floor(
+            difference /
+            (1000 * 60 * 60 * 24)
+        );
+
+
+    const hours =
+        Math.floor(
+            difference /
+            (1000 * 60 * 60)
+        ) % 24;
+
+
+    const minutes =
+        Math.floor(
+            difference /
+            (1000 * 60)
+        ) % 60;
+
+
+    const seconds =
+        Math.floor(
+            difference / 1000
+        ) % 60;
+
+
+    document.getElementById("days")
+        .textContent =
+        String(days).padStart(2,"0");
+
+
+    document.getElementById("hours")
+        .textContent =
+        String(hours).padStart(2,"0");
+
+
+    document.getElementById("minutes")
+        .textContent =
+        String(minutes).padStart(2,"0");
+
+
+    document.getElementById("seconds")
+        .textContent =
+        String(seconds).padStart(2,"0");
+
+}
+
+
+updateCountdown();
+
+setInterval(
+    updateCountdown,
+    1000
+);
+
+
+
+/* =====================================================
+   PACE CALCULATOR
+===================================================== */
+
+const paceMinutes =
+    document.getElementById(
+        "paceMinutes"
+    );
+
+const paceSeconds =
+    document.getElementById(
+        "paceSeconds"
+    );
+
+const paceResult =
+    document.getElementById(
+        "paceResult"
+    );
+
+
+function calculatePace() {
+
+    const minutes =
+        Number(paceMinutes.value) || 25;
+
+
+    const seconds =
+        Number(paceSeconds.value) || 0;
+
+
+    const totalSeconds =
+        minutes * 60 + seconds;
+
+
+    const pace =
+        Math.round(
+            totalSeconds / 5
+        );
+
+
+    const paceMin =
+        Math.floor(
+            pace / 60
+        );
+
+
+    const paceSec =
+        pace % 60;
+
+
+    paceResult.textContent =
+        `${paceMin}:${String(
+            paceSec
+        ).padStart(2,"0")} / KM`;
+
+}
+
+
+paceMinutes.addEventListener(
+    "input",
+    calculatePace
+);
+
+
+paceSeconds.addEventListener(
+    "input",
+    calculatePace
+);
+
+
+
+/* =====================================================
+   SCROLL REVEAL
+===================================================== */
+
+const observer =
+    new IntersectionObserver(
+
+        entries => {
+
+            entries.forEach(entry => {
+
+                if (entry.isIntersecting) {
+
+                    entry.target
+                        .classList
+                        .add("visible");
+
+                }
+
+            });
+
+        },
+
+        {
+            threshold: .12
+        }
+
+    );
+
+
+document
+    .querySelectorAll(".reveal")
+    .forEach(element => {
+
+        observer.observe(element);
+
+    });
+
+
+
+/* =====================================================
+   REAL MAP
+===================================================== */
+
+
+/*
+   Approximate coordinates.
+
+   BM Habitat Mall
+          ↓
+   Chalwamba Park
+          ↓
+   BM Habitat Mall
+*/
+
+
+const BM_HABITAT = [
+    12.3206,
+    76.6165
+];
+
+
+const CHALWAMBA_PARK = [
+    12.3268,
+    76.6250
+];
+
+
+const map =
+    L.map("runMap", {
+        scrollWheelZoom: true
+    });
+
+
+L.tileLayer(
+
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+    {
+        maxZoom: 19,
+
+        attribution:
+        '&copy; OpenStreetMap contributors'
+    }
+
+).addTo(map);
+
+
+
+/* ROUTE */
+
+const routeCoordinates = [
+
+    BM_HABITAT,
+
+    [
+        12.3215,
+        76.6180
+    ],
+
+    [
+        12.3230,
+        76.6200
+    ],
+
+    [
+        12.3250,
+        76.6225
+    ],
+
+    CHALWAMBA_PARK,
+
+    [
+        12.3250,
+        76.6225
+    ],
+
+    [
+        12.3230,
+        76.6200
+    ],
+
+    [
+        12.3215,
+        76.6180
+    ],
+
+    BM_HABITAT
+
+];
+
+
+const routeLine =
+    L.polyline(
+
+        routeCoordinates,
+
+        {
+            color: "#d8ff3e",
+            weight: 6,
+            opacity: .95,
+            lineCap: "round",
+            lineJoin: "round"
+        }
+
+    ).addTo(map);
+
+
+
+/* START */
+
+L.marker(BM_HABITAT)
+
+    .addTo(map)
+
+    .bindPopup(`
+
+        <strong>
+            Sunday Miles
+        </strong>
+
+        <br>
+
+        Start / Finish
+
+        <br>
+
+        BM Habitat Mall
+
+    `);
+
+
+
+/* TURNAROUND */
+
+L.marker(CHALWAMBA_PARK)
+
+    .addTo(map)
+
+    .bindPopup(`
+
+        <strong>
+            Chalwamba Park
+        </strong>
+
+        <br>
+
+        Turnaround point
+
+    `);
+
+
+
+/* CIRCLES */
+
+L.circleMarker(
+
+    BM_HABITAT,
+
+    {
+        radius: 8,
+        color: "#080909",
+        fillColor: "#d8ff3e",
+        fillOpacity: 1,
+        weight: 3
+    }
+
+).addTo(map);
+
+
+L.circleMarker(
+
+    CHALWAMBA_PARK,
+
+    {
+        radius: 8,
+        color: "#080909",
+        fillColor: "#ff5b61",
+        fillOpacity: 1,
+        weight: 3
+    }
+
+).addTo(map);
+
+
+
+/* FIT MAP */
+
+map.fitBounds(
+
+    routeLine.getBounds(),
+
+    {
+        padding: [45,45]
+    }
+
+);
+
+
+
+/* =====================================================
+   FOOTER YEAR
+===================================================== */
+
+document.getElementById("year")
+    .textContent =
+    new Date().getFullYear();
+
+</script>
+
+
+</body>
+
+</html>
+
